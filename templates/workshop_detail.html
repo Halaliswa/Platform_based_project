@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        
+        <!-- REQUIREMENT 5.2: Navigation link to browse other events -->
+        <div class="mb-3">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary rounded-pill btn-sm px-3">
+                <i class="fas fa-arrow-left me-2"></i>Browse Other Workshops
+            </a>
+        </div>
+
+        <!-- Main Workshop Info Card -->
+        <div class="card shadow border-0 p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <!-- Display Faculty Badge -->
+                    <span class="badge rounded-pill bg-dark px-3 mb-2">{{ workshop.faculty }}</span>
+                    <span class="badge rounded-pill bg-primary px-3 mb-2">{{ workshop.category }}</span>
+                    <span class="badge rounded-pill bg-info text-dark px-3 mb-2">{{ workshop.level }}</span>
+                    <h1 class="display-5 fw-bold">{{ workshop.title }}</h1>
+                </div>
+                <div class="text-end bg-light p-3 rounded shadow-sm">
+                    <h3 class="mb-0 fw-bold text-primary">{{ enrolled_count }} / {{ workshop.capacity }}</h3>
+                    <small class="text-muted text-uppercase fw-bold">Enrolled Students</small>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row">
+                <!-- Left Column: Description & Facilitator -->
+                <div class="col-md-7">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>About this Workshop</h5>
+                    <p class="text-secondary lead" style="white-space: pre-wrap;">{{ workshop.description }}</p>
+                    
+                    <div class="mt-4 p-3 border-start border-4 border-primary bg-light">
+                        <h6 class="mb-1 fw-bold">Facilitator</h6>
+                        <p class="mb-0 text-muted">{{ workshop.facilitator.full_name }} ({{ workshop.facilitator.email }})</p>
+                    </div>
+                </div>
+
+                <!-- Right Column: Date, Time, Venue -->
+                <div class="col-md-5">
+                    <div class="list-group list-group-flush shadow-sm border rounded">
+                        <div class="list-group-item">
+                            <h6 class="mb-1 fw-bold text-primary"><i class="fas fa-calendar-alt me-2"></i>Date</h6>
+                            <p class="mb-0">{{ workshop.date.strftime('%A, %d %B %Y') }}</p>
+                        </div>
+                        <div class="list-group-item">
+                            <h6 class="mb-1 fw-bold text-primary"><i class="fas fa-clock me-2"></i>Time</h6>
+                            <p class="mb-0">{{ workshop.start_time.strftime('%H:%M') }} - {{ workshop.end_time.strftime('%H:%M') }}</p>
+                        </div>
+                        <div class="list-group-item">
+                            <h6 class="mb-1 fw-bold text-primary">
+                                {% if workshop.workshop_type == 'Online' %}
+                                    <i class="fas fa-video me-2"></i>Joining Link
+                                {% else %}
+                                    <i class="fas fa-map-marker-alt me-2"></i>Venue
+                                {% endif %}
+                            </h6>
+                            {% if workshop.workshop_type == 'Online' %}
+                                <a href="{{ workshop.online_link }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                    Open Link (Zoom/Teams)
+                                </a>
+                            {% else %}
+                                <p class="mb-0">{{ workshop.venue }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Enrollment/Action Buttons -->
+                    <div class="d-grid gap-2 mt-4">
+                        {% if current_user.role == 'student' %}
+                            {% if not is_registered %}
+                                {% if enrolled_count >= workshop.capacity %}
+                                    <div class="alert alert-danger border-0 shadow-sm mb-2 text-center small">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Fully booked. No more registrations accepted.
+                                    </div>
+                                    <button class="btn btn-secondary btn-lg rounded-pill shadow" disabled>Fully Booked</button>
+                                {% else %}
+                                    <a href="{{ url_for('register_workshop', workshop_id=workshop.id) }}" 
+                                       class="btn btn-primary btn-lg rounded-pill shadow">
+                                        Enroll Now
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <button class="btn btn-success btn-lg rounded-pill shadow" disabled>
+                                    <i class="fas fa-check-circle me-2"></i>You are Enrolled
+                                </button>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if workshop.is_over() %}
+                            <a href="{{ url_for('submit_feedback', workshop_id=workshop.id) }}" class="btn btn-outline-dark rounded-pill">
+                                <i class="fas fa-star text-warning me-2"></i>Submit Feedback
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-secondary rounded-pill" disabled title="Opens after workshop ends">
+                                Feedback opens after event ends
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTIFICATION SYSTEM: Updated for Email Broadcast -->
+        {% if current_user.id == workshop.facilitator_id or current_user.role == 'admin' %}
+        <div class="card shadow border-0 mb-4 bg-dark text-white">
+            <div class="card-body p-4">
+                <h5 class="fw-bold"><i class="fas fa-envelope-open-text me-2 text-warning"></i>Email Broadcast to Students</h5>
+                <p class="small text-white-50">Sending a message here will email all registered students regarding venue changes or postponement.</p>
+                <form action="{{ url_for('broadcast_message', workshop_id=workshop.id) }}" method="POST" class="mt-3">
+                    <textarea name="message" class="form-control mb-3" rows="2" placeholder="Example: The workshop has been moved to Lab 4 due to maintenance..."></textarea>
+                    <button type="submit" class="btn btn-warning btn-sm fw-bold">Send Email Notification</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE TRACKING -->
+        <div class="card shadow border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i>Registered Student List</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Full Name</th>
+                                <th>Email Address</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in registrations %}
+                            <tr>
+                                <td class="ps-4 fw-bold">{{ reg.user.full_name }}</td>
+                                <td>{{ reg.user.email }}</td>
+                                <td><span class="badge bg-success">Registered</span></td>
+                                <td class="text-center">
+                                   <a href="{{ url_for('mark_attendance', workshop_id=workshop.id, student_id=reg.user_id) }}" 
+                                     class="btn btn-sm btn-outline-primary">Mark Present</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No students have signed up yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+ {% if current_user.role == 'admin' or current_user.id == workshop.facilitator_id %}
+                          <a href="{{ url_for('generate_workshop_qr', workshop_id=workshop.id) }}"
+                           class="btn btn-dark rounded-pill">
+                          <i class="fas fa-qrcode me-2"></i>View QR Code
+                              </a>
+                          {% endif %}
+
+
+                          {% if current_user.role == 'admin' or current_user.id == workshop.facilitator_id %}
+<div class="card shadow border-0 rounded-4 mt-4">
+    <div class="card-body text-center">
+        <h5 class="fw-bold mb-3">Workshop Attendance QR Code</h5>
+        <img src="{{ url_for('generate_workshop_qr', workshop_id=workshop.id) }}"
+             alt="Workshop QR Code"
+             class="img-fluid"
+             style="max-width: 250px;">
+        <p class="text-muted mt-3 mb-0">
+            Students can scan this QR code to mark attendance.
+        </p>
+    </div>
+</div>
+{% endif %}
+    </div>
+</div>
+<br>
+{% endblock %}

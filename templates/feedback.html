@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-7 col-lg-6 mb-5">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <!-- Header with Feedback Theme -->
+            <div class="card-header py-4 text-center border-0" style="background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%);">
+                <i class="fas fa-star fa-3x text-white mb-2 shadow-sm"></i>
+                <h2 class="fw-bold mb-0 text-white">Share Your Experience</h2>
+            </div>
+            
+            <div class="card-body p-4 p-md-5">
+                <!-- Workshop Context Info -->
+                <div class="text-center mb-4">
+                    <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 mb-2 border border-warning-subtle">Workshop Feedback</span>
+                    <h4 class="fw-bold text-dark mb-1">{{ workshop.title }}</h4>
+                    <p class="text-muted small mb-3">Facilitated by <span class="text-primary fw-bold">{{ workshop.facilitator.full_name }}</span></p>
+                    <div class="d-inline-flex align-items-center py-1 px-3 bg-light rounded-pill border small text-secondary">
+                        <i class="far fa-calendar-check me-2 text-warning"></i>
+                        Session Date: {{ workshop.date.strftime('%d %B %Y') }}
+                    </div>
+                </div>
+
+                <hr class="my-4 opacity-50">
+
+                <!-- Feedback Form -->
+                <form method="POST" action="{{ url_for('submit_feedback', workshop_id=workshop.id) }}">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Rating Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-block text-center mb-3">
+                            How would you rate this session?
+                        </label>
+                        <div class="d-flex justify-content-center">
+                            {{ form.rating(class="form-select form-select-lg rounded-pill text-center border-2 border-warning", style="max-width: 320px;") }}
+                        </div>
+                        {% if form.rating.errors %}
+                            {% for error in form.rating.errors %}
+                                <div class="text-danger small text-center mt-2 animate__animated animate__shakeX">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Comment Section -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-comment-dots me-2 text-warning"></i>Your Comments & Suggestions
+                        </label>
+                        {{ form.comment(class="form-control rounded-4 shadow-sm", rows=5, placeholder="What did you learn? Was the facilitator helpful? Any suggestions for improvement?") }}
+                        {% if form.comment.errors %}
+                            {% for error in form.comment.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm py-3 text-dark">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Navigation -->
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted small hover-primary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Student Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- POPIA FOOTER: Legal compliance requirement -->
+            <div class="card-footer bg-light border-0 py-3 text-center">
+                <small class="text-muted" style="font-size: 0.75rem;">
+                    <i class="fas fa-shield-alt me-1"></i> 
+                    This feedback is processed in accordance with the <strong>POPI Act</strong>. 
+                    Your identity is visible only to the Administrator and Facilitator for quality assurance.
+                </small>
+            </div>
+        </div>
+
+        <!-- System Verification Note -->
+        <div class="alert bg-white shadow-sm mt-4 border-0 rounded-4 p-3">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+                <div class="ms-3">
+                    <p class="mb-0 small text-secondary">
+                        <strong>Logic Verified:</strong> This session has ended. Feedback is now open for participants.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rounded-4 { border-radius: 1rem !important; }
+    .form-select:focus, .form-control:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.2);
+    }
+    .hover-primary:hover {
+        color: #0d6efd !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Reports: {{ workshop.title }}</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="row">
+        <!-- ATTENDANCE COLUMN -->
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fas fa-user-check me-2"></i>Attendance List
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Student Name</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg in registrations %}
+                            <tr>
+                                <td class="ps-3">{{ reg.user.full_name }}</td>
+                                <td>
+                                    <!-- Check if student is in the attendance list -->
+                                    {% if reg.user.id in attendees|map(attribute='user_id') %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark border">Not Marked</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('mark_attendance', workshop_id=workshop.id, student_id=reg.user.id) }}" 
+                                       class="btn btn-sm btn-primary">Mark Present</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK COLUMN -->
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="fas fa-star me-2"></i>Student Feedback
+                </div>
+                <div class="card-body">
+                    {% for fb in feedbacks %}
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <strong>Rating: {{ fb.rating }}/5</strong>
+                            <small class="text-muted">{{ fb.created_at.strftime('%d %b') }}</small>
+                        </div>
+                        <p class="mb-0 small text-secondary">"{{ fb.comment }}"</p>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No feedback submitted yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 admin-dashboard">
+
+    <!-- Hero Header -->
+    <div class="hero-card mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="hero-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h2 class="mb-1 fw-bold text-white">
+                            {{ current_user.role|capitalize }} Dashboard
+                        </h2>
+                        <p class="mb-0 text-white-50">
+                            {% if request.args.get('faculty') %}
+                                Managing workshops for
+                                <span class="badge bg-light text-primary ms-1">{{ request.args.get('faculty') }}</span>
+                            {% else %}
+                                Manage workshops, facilitators, students, and reports across all faculties.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="hero-actions">
+                    <a href="{{ url_for('admin_calendar') }}" class="btn btn-light rounded-pill px-3">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Calendar
+                    </a>
+
+                    {% if current_user.role in ['admin', 'facilitator'] %}
+                    <a href="{{ url_for('create_workshop') }}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                        <i class="fas fa-plus me-2"></i>New Workshop
+                    </a>
+                    {% endif %}
+
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('create_facilitator') }}" class="btn btn-success rounded-pill px-3 shadow-sm">
+                        <i class="fas fa-user-plus me-2"></i>Add Facilitator
+                    </a>
+                    {% endif %}
+
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-light rounded-pill px-3">
+                        <i class="fas fa-search me-2"></i>Browse All
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-primary h-100">
+                <div class="stat-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Total Workshops</div>
+                    <div class="stat-value">{{ total_workshops }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-success h-100">
+                <div class="stat-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Total Students</div>
+                    <div class="stat-value">{{ total_students }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-warning h-100">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Facilitators</div>
+                    <div class="stat-value">{{ total_facilitators }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-danger h-100">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div>
+                    <div class="stat-label">Feedback</div>
+                    <div class="stat-value">{{ total_feedback }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form action="{{ url_for('dashboard') }}" method="GET" class="row g-3 align-items-center">
+                <div class="col-lg-3">
+                    <label class="filter-label">
+                        <i class="fas fa-filter me-2 text-primary"></i>Filter by Faculty
+                    </label>
+                </div>
+
+                <div class="col-lg-5">
+                    <select name="faculty" class="form-select rounded-pill shadow-sm border-0" onchange="this.form.submit()">
+                        <option value="">-- All Faculties --</option>
+                        <option value="Management Sciences" {% if request.args.get('faculty') == 'Management Sciences' %}selected{% endif %}>Management Sciences</option>
+                        <option value="Engineering & Built Environment" {% if request.args.get('faculty') == 'Engineering & Built Environment' %}selected{% endif %}>Engineering & Built Environment</option>
+                        <option value="Health Sciences" {% if request.args.get('faculty') == 'Health Sciences' %}selected{% endif %}>Health Sciences</option>
+                        <option value="Arts and Design" {% if request.args.get('faculty') == 'Arts and Design' %}selected{% endif %}>Arts and Design</option>
+                        <option value="Accounting and Informatics" {% if request.args.get('faculty') == 'Accounting and Informatics' %}selected{% endif %}>Accounting and Informatics</option>
+                        <option value="Applied Science" {% if request.args.get('faculty') == 'Applied Science' %}selected{% endif %}>Applied Science</option>
+                    </select>
+                </div>
+
+                {% if request.args.get('faculty') %}
+                <div class="col-lg-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-danger rounded-pill px-3">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Workshop Table -->
+    <div class="card shadow border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold text-primary">
+                    <i class="fas fa-layer-group me-2"></i>Workshop Management
+                </h5>
+                <small class="text-muted">Track schedule, capacity, and reporting for each workshop.</small>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 dashboard-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Workshop</th>
+                            <th>Schedule</th>
+                            <th>Enrollment</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for workshop in workshops %}
+                        {% set enrolled = workshop.registrations|length %}
+                        {% set percentage = ((enrolled / workshop.capacity) * 100)|int if workshop.capacity > 0 else 0 %}
+
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('workshop_detail', workshop_id=workshop.id) }}"
+                                   class="workshop-title">
+                                    {{ workshop.title }}
+                                </a>
+                                <div class="mt-2">
+                                    <span class="badge faculty-badge">{{ workshop.faculty }}</span>
+                                    <span class="text-muted small d-block mt-1">{{ workshop.category }}</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold text-dark">
+                                    <i class="far fa-calendar-alt me-2 text-primary"></i>
+                                    {{ workshop.date.strftime('%d %b %Y') }}
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="far fa-clock me-2"></i>
+                                    {{ workshop.start_time.strftime('%H:%M') }} - {{ workshop.end_time.strftime('%H:%M') }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-semibold">{{ enrolled }} / {{ workshop.capacity }}</span>
+                                    <span class="text-muted">{{ percentage }}%</span>
+                                </div>
+
+                                <div class="progress custom-progress">
+                                    <div class="progress-bar {% if enrolled >= workshop.capacity %}bg-danger{% else %}bg-primary{% endif %}"
+                                         role="progressbar"
+                                         style="width: {{ percentage }}%;"
+                                         aria-valuenow="{{ percentage }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+
+                                {% if enrolled >= workshop.capacity %}
+                                <span class="badge bg-danger rounded-pill mt-2">Fully Booked</span>
+                                {% else %}
+                                <span class="badge bg-success rounded-pill mt-2">Open</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center pe-4">
+                                <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                    <a href="{{ url_for('workshop_reports', workshop_id=workshop.id) }}#attendance"
+                                       class="btn btn-sm btn-white border-end"
+                                       title="Attendance">
+                                        <i class="fas fa-user-check text-primary"></i>
+                                    </a>
+                                    <a href="{{ url_for('workshop_reports', workshop_id=workshop.id) }}#feedback"
+                                       class="btn btn-sm btn-white border-end"
+                                       title="Feedback">
+                                        <i class="fas fa-star text-warning"></i>
+                                    </a>
+                                    <a href="{{ url_for('workshop_detail', workshop_id=workshop.id) }}"
+                                       class="btn btn-sm btn-white"
+                                       title="View Workshop">
+                                        <i class="fas fa-eye text-success"></i>
+                                    </a>
+                                </div>
+                                <div class="small text-muted mt-2">Reports / Details</div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-folder-open mb-3"></i>
+                                    <p class="mb-0 text-muted">No workshops found for the selected criteria.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Facilitator Table -->
+    {% if current_user.role == 'admin' and facilitators %}
+    <div class="card shadow border-0 rounded-4 overflow-hidden mt-4">
+        <div class="card-header bg-white border-0 py-3 px-4">
+            <h5 class="mb-0 fw-bold text-success">
+                <i class="fas fa-users-cog me-2"></i>Facilitator Management
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 dashboard-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Facilitator</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th class="text-center pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for facilitator in facilitators %}
+                        <tr>
+                            <td class="ps-4 fw-semibold">{{ facilitator.full_name }}</td>
+                            <td>{{ facilitator.email }}</td>
+                            <td>
+                                {% if facilitator.is_suspended %}
+                                    <span class="badge bg-danger rounded-pill">Suspended</span>
+                                {% else %}
+                                    <span class="badge bg-success rounded-pill">Active</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center pe-4">
+                                <a href="{{ url_for('toggle_facilitator_status', user_id=facilitator.id) }}"
+                                   class="btn btn-sm {% if facilitator.is_suspended %}btn-success{% else %}btn-warning{% endif %} rounded-pill px-3">
+                                    {% if facilitator.is_suspended %}
+                                        <i class="fas fa-check-circle me-1"></i>Activate
+                                    {% else %}
+                                        <i class="fas fa-ban me-1"></i>Suspend
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .admin-dashboard {
+        color: #1f2937;
+    }
+
+    .hero-card {
+        background: linear-gradient(135deg, #0d6efd, #0047ab);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 18px 45px rgba(13, 110, 253, 0.18);
+    }
+
+    .hero-icon {
+        width: 68px;
+        height: 68px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.16);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 28px;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: lg-end;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 22px;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        transition: 0.25s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .stat-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff;
+    }
+
+    .stat-primary .stat-icon { background: linear-gradient(135deg, #0d6efd, #3b82f6); }
+    .stat-success .stat-icon { background: linear-gradient(135deg, #198754, #22c55e); }
+    .stat-warning .stat-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+    .stat-danger .stat-icon { background: linear-gradient(135deg, #dc3545, #f87171); }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.1;
+        margin-top: 4px;
+    }
+
+    .filter-label {
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0;
+    }
+
+    .dashboard-table thead th {
+        background: #f8fafc;
+        color: #6b7280;
+        text-transform: uppercase;
+        font-size: 0.76rem;
+        letter-spacing: 0.6px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .dashboard-table tbody td {
+        vertical-align: middle;
+        padding-top: 18px;
+        padding-bottom: 18px;
+        border-color: #f1f5f9;
+    }
+
+    .workshop-title {
+        text-decoration: none;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .workshop-title:hover {
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+
+    .faculty-badge {
+        background: #e8f0ff;
+        color: #0d6efd;
+        border: 1px solid #cfe0ff;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .custom-progress {
+        height: 8px;
+        border-radius: 999px;
+        background: #e9eef7;
+        overflow: hidden;
+    }
+
+    .btn-white {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+    }
+
+    .btn-white:hover {
+        background: #f8fafc;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 768px) {
+        .hero-card {
+            padding: 22px;
+        }
+
+        .hero-actions {
+            justify-content: flex-start;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
