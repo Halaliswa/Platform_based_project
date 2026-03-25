@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 
- models import db, User, Workshop, Registration, Attendance, Feedback, Notification
+from models import db, User, Workshop, Registration, Attendance, Feedback, Notification
 from forms import RegisterForm, LoginForm, WorkshopForm, FeedbackForm, FacilitatorForm
 
 app = Flask(__name__)
