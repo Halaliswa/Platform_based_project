@@ -14,7 +14,7 @@ class RegisterForm(FlaskForm):
         validators=[DataRequired(), EqualTo('password', message='Passwords must match')]
     )
    
-    # REQUIREMENT: POPIA Consent
+     REQUIREMENT: POPIA Consent
     popia_consent = BooleanField('I agree to the POPI Act terms', validators=[DataRequired()])
     submit = SubmitField('Create Account')
 
