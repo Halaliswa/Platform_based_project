@@ -12,7 +12,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default='student') # student, facilitator, admin
     is_suspended = db.Column(db.Boolean, default=False)
-    # --- POPIA COMPLIANCE FIELDS ---
+     --- POPIA COMPLIANCE FIELDS ---
     popia_consent = db.Column(db.Boolean, default=False, nullable=False)
     consent_date = db.Column(db.DateTime, nullable=True)
 
