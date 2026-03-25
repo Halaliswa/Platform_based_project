@@ -33,7 +33,7 @@ class WorkshopForm(FlaskForm):
         DataRequired(message="Please provide a description of what students will learn.")
     ])
     
-    2. Faculty Association
+    #2. Faculty Association
     faculty = SelectField('Target Faculty', choices=[
         ('Management Sciences', 'Management Sciences'),
         ('Engineering & Built Environment', 'Engineering & Built Environments'),
