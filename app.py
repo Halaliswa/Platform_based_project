@@ -1,4 +1,4 @@
-oimport os
+import os
 import secrets
 import string
 import qrcode
