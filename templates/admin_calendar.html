@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 1. Load CSS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-primary"><i class="fas fa-calendar-check me-2"></i>Master Schedule</h2>
+            <p class="text-muted mb-0">Monthly view of all faculty workshops</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-body p-4">
+            <!-- Calendar Container -->
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Load JS Libraries -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        // Ensure data is parsed correctly using |tojson|safe
+        var eventData = {{ events|tojson|safe }};
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 650,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            // Load the events
+            events: eventData,
+            
+            // Interaction: Clicking an event opens the workshop page
+            eventClick: function(info) {
+                if (info.event.url) {
+                    window.location.href = info.event.url;
+                    info.jsEvent.preventDefault(); // Prevents browser from following link in new tab
+                }
+            },
+            
+            // Style the events
+            eventDisplay: 'block',
+            eventTimeFormat: { 
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+
+<style>
+    /* Fix for small calendar height */
+    #calendar {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    /* Style calendar buttons to match your theme */
+    .fc-button-primary {
+        background-color: #4e73df !important;
+        border-color: #4e73df !important;
+    }
+    .fc-daygrid-event {
+        border-radius: 5px;
+        padding: 2px 5px;
+        font-size: 0.85rem;
+        border: none !important;
+    }
+    .fc-toolbar-title {
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #5a5c69;
+    }
+</style>
+{% endblock %}

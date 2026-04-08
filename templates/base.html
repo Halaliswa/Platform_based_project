@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}DUT PeerHub{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Plus Jakarta Sans (modern) + Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fe 0%, #eef2fa 100%);
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            color: #1a2c3e;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e4a6e;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0f3b5c;
+        }
+
+        .main-wrapper {
+            flex: 1;
+        }
+
+        /* ========== ATTRACTIVE NAVBAR WITH GLASS EFFECT ========== */
+        .navbar {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 0.8rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(30, 74, 110, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 0.5rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.6rem;
+            letter-spacing: -0.5px;
+            color: #0a2b3e !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            position: relative;
+        }
+
+        .dut-logo {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .navbar-brand:hover .dut-logo {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #1e4a6e 0%, #2c6e9e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .brand-text::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e4a6e, #3b82f6);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .navbar-brand:hover .brand-text::after {
+            width: 100%;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: #2c4b6e !important;
+            padding: 0.6rem 1.2rem !important;
+            margin: 0 0.15rem;
+            border-radius: 40px;
+            transition: all 0.25s ease;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .nav-link i {
+            transition: transform 0.2s ease;
+        }
+
+        .nav-link:hover i {
+            transform: translateX(-3px);
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, #eef2ff, #e6edf6);
+            color: #1e4a6e !important;
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 0.7rem 0;
+            margin-top: 0.8rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            animation: fadeInUp 0.2s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            font-weight: 500;
+            padding: 0.7rem 1.8rem;
+            font-size: 0.9rem;
+            color: #1e2f3e;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item i {
+            width: 1.6rem;
+            color: #1e4a6e;
+            transition: transform 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, #eef2ff, transparent);
+            color: #0f3b5c;
+            padding-left: 2.2rem;
+        }
+
+        .dropdown-item:hover i {
+            transform: translateX(4px);
+        }
+
+        /* Premium User Badge */
+        .user-badge {
+            background: linear-gradient(135deg, #1e4a6e10, #3b82f610);
+            backdrop-filter: blur(4px);
+            padding: 0.45rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e4a6e;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(30, 74, 110, 0.2);
+            transition: all 0.2s;
+        }
+
+        .user-badge i {
+            font-size: 1rem;
+            color: #1e4a6e;
+        }
+
+        .user-badge:hover {
+            background: linear-gradient(135deg, #1e4a6e20, #3b82f620);
+            transform: scale(1.02);
+        }
+
+        /* Modern Card Design */
+        .card {
+            border: none;
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(2px);
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 28px 40px -16px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+        }
+
+        /* Gradient Buttons */
+        .btn {
+            border-radius: 50px;
+            font-weight: 700;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e4a6e 0%, #2c6e9e 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(30, 74, 110, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0f3b5c 0%, #1e5a7e 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 74, 110, 0.35);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #1e4a6e;
+            background: transparent;
+            color: #1e4a6e;
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #1e4a6e, #2c6e9e);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* Flash Messages - Premium */
+        .alert {
+            border-radius: 24px;
+            border: none;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(8px);
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Footer with gradient border */
+        footer {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            color: #5a6e7c;
+            text-align: center;
+            padding: 1.8rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(30, 74, 110, 0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e4a6e, #3b82f6, #6c9ebf, #1e4a6e);
+            background-size: 300% 100%;
+            animation: gradientMove 3s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        footer i {
+            color: #1e4a6e;
+            margin: 0 4px;
+        }
+
+        /* Container */
+        .container-custom {
+            max-width: 1300px;
+        }
+
+        /* Hero Gradient Text Helper */
+        .gradient-text {
+            background: linear-gradient(135deg, #1e4a6e, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            .dut-logo {
+                height: 38px;
+            }
+            .card {
+                border-radius: 24px;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Loading animation for buttons (optional) */
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Navbar toggler animation */
+        .navbar-toggler {
+            border: none;
+            background: rgba(30, 74, 110, 0.1);
+            border-radius: 12px;
+            padding: 8px 12px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="main-wrapper">
+    <!-- NAVBAR - Premium Glass Effect -->
+    <nav class="navbar navbar-expand-lg sticky-top" id="mainNavbar">
+        <div class="container container-custom">
+            <a class="navbar-brand" href="{{ url_for('index') }}" data-aos="fade-right" data-aos-duration="600">
+                <img class="dut-logo" src="https://tse1.mm.bing.net/th/id/OIP.1fgoOiKuu6PMszYGD7kxMAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3"
+                     alt="Durban University of Technology Logo">
+                <span class="brand-text">DUT PeerHub</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-grip-lines" style="color:#1e4a6e; font-size:1.3rem;"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item" data-aos="fade-down" data-aos-delay="100">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item" data-aos="fade-down" data-aos-delay="150">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-chalkboard-user me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.is_authenticated and current_user.role in ['admin', 'facilitator'] %}
+                    <li class="nav-item dropdown" data-aos="fade-down" data-aos-delay="200">
+                        <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-sliders-h me-1"></i>Management
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="managementDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('create_workshop') }}">
+                                    <i class="fas fa-calendar-plus me-2"></i>Create Workshop
+                                </a>
+                            </li>
+                            {% if current_user.role == 'admin' %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('dashboard') }}">
+                                    <i class="fas fa-user-shield me-2"></i>Admin Panel
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav align-items-center">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item" data-aos="fade-left" data-aos-delay="100">
+                        <div class="user-badge">
+                            <i class="fas fa-user-astronaut"></i>
+                            <span>{{ current_user.full_name }}</span>
+                        </div>
+                    </li>
+                    <li class="nav-item ms-2" data-aos="fade-left" data-aos-delay="150">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-arrow-right-from-bracket me-1"></i>Exit
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item" data-aos="fade-left" data-aos-delay="100">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-key me-1"></i>Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item" data-aos="fade-left" data-aos-delay="150">
+                        <a class="btn btn-primary ms-2" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Get Started
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FLASH MESSAGES -->
+    <div class="container container-custom mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" data-aos="fade-down">
+                        <i class="fas fa-{% if category == 'success' %}check-circle fa-fw{% elif category == 'danger' %}exclamation-triangle fa-fw{% else %}info-circle fa-fw{% endif %} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container container-custom mt-4 mb-5">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- FOOTER with animated gradient -->
+<footer>
+    <div class="container">
+        <p>
+            <i class="fas fa-graduation-cap"></i> DUT PeerHub — Empowering collaborative learning 
+            <span style="opacity:0.6;">|</span> © 2026 Durban University of Technology
+            <br>
+            <small style="opacity:0.7;"><i class="fas fa-lightbulb"></i> Connect. Share. Grow.</small>
+        </p>
+    </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<!-- Initialize AOS & Scroll Effect -->
+<script>
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 50,
+        easing: 'ease-out-cubic'
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('mainNavbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Bootstrap dropdowns manual init
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+    dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl)
+    });
+</script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6 mb-5">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <!-- Decorative Top Bar with DUT Gold Accent -->
+            <div class="bg-primary" style="height: 6px;"></div>
+            
+            <div class="card-body p-5">
+                <!-- Header with DUT Logo -->
+                <div class="text-center mb-4">
+                    <!-- DUT Logo - Attractive and Professional -->
+                    <div class="dut-logo-wrapper mb-3">
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.1fgoOiKuu6PMszYGD7kxMAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" 
+                             alt="Durban University of Technology Logo" 
+                             class="dut-register-logo">
+                    </div>
+                   
+                    <h2 class="fw-bold text-dark">Create Account</h2>
+                    <p class="text-muted small">Join the South African Peer-Led Learning Community</p>
+                    <div class="dut-badge">
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2 mt-1">
+                            <i class="fas fa-university text-primary me-1"></i> DUT Peer-Led Excellence
+                        </span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}" class="needs-validation">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row">
+                        <!-- Full Name -->
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold small text-uppercase text-secondary">
+                                <i class="fas fa-id-card me-2"></i>Full Name
+                            </label>
+                            {{ form.full_name(class="form-control form-control-lg rounded-pill px-4 shadow-sm", placeholder="e.g. Jane Doe") }}
+                            {% if form.full_name.errors %}
+                                {% for error in form.full_name.errors %}
+                                    <div class="text-danger x-small mt-1 ms-3">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold small text-uppercase text-secondary">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            {{ form.email(class="form-control form-control-lg rounded-pill px-4 shadow-sm", placeholder="name@example.com") }}
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <div class="text-danger x-small mt-1 ms-3">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Passwords -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-uppercase text-secondary">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            {{ form.password(class="form-control form-control-lg rounded-pill px-4 shadow-sm") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-uppercase text-secondary">Confirm</label>
+                            {{ form.confirm_password(class="form-control form-control-lg rounded-pill px-4 shadow-sm") }}
+                        </div>
+                    </div>
+
+                   
+
+                    <!-- POPIA COMPLIANCE BOX (Inside the Form) -->
+                    <div class="card bg-light border-0 rounded-4 mb-4">
+                        <div class="card-body p-3">
+                            <div class="form-check">
+                                <!-- Updated to use Flask-WTF Helper -->
+                                {{ form.popia_consent(class="form-check-input border-primary", id="popia_consent") }}
+                                
+                                <label class="form-check-label small text-dark fw-semibold" for="popia_consent">
+                                    I consent to the processing of my personal data under the 
+                                    <a href="#" class="text-primary text-decoration-underline" data-bs-toggle="modal" data-bs-target="#popiaModal">
+                                        South African POPI Act
+                                    </a>.
+                                </label>
+
+                                <!-- Error message if they try to submit without checking -->
+                                {% if form.popia_consent.errors %}
+                                    {% for error in form.popia_consent.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow py-3">
+                            <i class="fas fa-check-circle me-2"></i>Complete Registration
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4 opacity-25">
+
+                <div class="text-center">
+                    <p class="mb-0 text-muted">Already have an account? 
+                        <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none hover-underline">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- POPIA MODAL -->
+<div class="modal fade" id="popiaModal" tabindex="-1" aria-labelledby="popiaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-primary text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="popiaModalLabel">
+                    <i class="fas fa-shield-alt me-2"></i>Privacy Policy (POPIA)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-secondary">
+                <p class="small">As per the <strong>Protection of Personal Information Act (POPIA)</strong>, we are committed to protecting your privacy. By registering, you acknowledge:</p>
+                <ul class="small ps-3">
+                    <li class="mb-2"><strong>Purpose:</strong> Your name and email are used solely for workshop management and attendance tracking.</li>
+                    <li class="mb-2"><strong>Security:</strong> We employ industry-standard encryption to keep your password and details safe.</li>
+                    <li class="mb-2"><strong>Sharing:</strong> Your personal data will <u>never</u> be shared with third-party marketing companies.</li>
+                    <li><strong>Control:</strong> You have the right to request access to or deletion of your data at any time via the Help Desk.</li>
+                </ul>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rounded-4 { border-radius: 1.25rem !important; }
+    .x-small { font-size: 0.75rem; }
+    .hover-underline:hover { text-decoration: underline !important; }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    /* DUT Logo Styling - Attractive and Professional */
+    .dut-logo-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+    
+    .dut-register-logo {
+        height: 70px;
+        width: auto;
+        border-radius: 50px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        transition: all 0.3s ease;
+        background: white;
+        padding: 6px 14px;
+        object-fit: contain;
+        border: 1px solid rgba(13, 110, 253, 0.1);
+    }
+    
+    .dut-register-logo:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+    
+    .dut-badge {
+        margin-top: 6px;
+    }
+    
+    .dut-badge .badge {
+        font-size: 0.7rem;
+        font-weight: 500;
+        background: #f8f9fa !important;
+        border-left: 3px solid #0d6efd;
+        border-right: 3px solid #e6b422;
+    }
+    
+    /* Enhance the card header with DUT identity */
+    .card {
+        position: relative;
+    }
+    
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #0d6efd, #e6b422, #0d6efd);
+        border-radius: 1.25rem 1.25rem 0 0;
+    }
+    
+    /* Remove the original decorative bar and use gradient instead */
+    .bg-primary[style*="height: 6px"] {
+        display: none;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .dut-register-logo {
+            height: 55px;
+        }
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+{% endblock %}

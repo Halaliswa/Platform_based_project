@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-7 mb-5">
+        <div class="card shadow-lg border-0 rounded-4">
+            <!-- Header -->
+            <div class="card-header bg-success text-white py-4 text-center border-0">
+                <i class="fas fa-calendar-plus fa-3x mb-2"></i>
+                <h2 class="fw-bold mb-0">Schedule a New Workshop</h2>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" class="needs-validation">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- 1. Title -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-heading me-2 text-success"></i>Workshop Title</label>
+                        {{ form.title(class="form-control form-control-lg rounded-3", placeholder="e.g. Python for Data Science") }}
+                        {% if form.title.errors %}<div class="text-danger small">{% for error in form.title.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                    </div>
+
+                    <!-- 2. Faculty (THE MISSING LINK) -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-university me-2 text-success"></i>Target Faculty</label>
+                        {{ form.faculty(class="form-select form-select-lg rounded-3") }}
+                        <div class="form-text small">Which faculty is this session specifically for?</div>
+                        {% if form.faculty.errors %}<div class="text-danger small">{% for error in form.faculty.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                    </div>
+
+                    <!-- 3. Description -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-align-left me-2 text-success"></i>Detailed Description</label>
+                        {{ form.description(class="form-control rounded-3", rows="3", placeholder="What will students learn?") }}
+                        {% if form.description.errors %}<div class="text-danger small">{% for error in form.description.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                    </div>
+
+                    <!-- 4. Category & Level -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Discipline/Field</label>
+                            {{ form.category(class="form-select rounded-3") }}
+                            {% if form.category.errors %}<div class="text-danger small">{% for error in form.category.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Experience Level</label>
+                            {{ form.level(class="form-select rounded-3") }}
+                            {% if form.level.errors %}<div class="text-danger small">{% for error in form.level.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 5. Workshop Type & Facilitator -->
+                    <div class="row mb-4">
+    <div class="col-md-6">
+        <label class="form-label fw-bold">Delivery Mode</label>
+        {{ form.workshop_type(class="form-select rounded-3", id="typeSelect") }}
+    </div>
+
+    {% if current_user.role == 'admin' %}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">Assigned Facilitator</label>
+        {{ form.facilitator_id(class="form-select rounded-3") }}
+        {% if form.facilitator_id.errors %}
+            <div class="text-danger small">
+                {% for error in form.facilitator_id.errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="col-md-6">
+        <label class="form-label fw-bold">Assigned Facilitator</label>
+        <input type="text" class="form-control rounded-3" value="{{ current_user.full_name }}" readonly>
+    </div>
+    {% endif %}
+</div>
+
+                    <!-- 6. Venue / Online Link Logic -->
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3" id="locationContainer">
+                        <div id="venueGroup">
+                            <label class="form-label fw-bold text-success"><i class="fas fa-map-marker-alt me-2"></i>Campus Venue</label>
+                            {{ form.venue(class="form-control rounded-3", placeholder="e.g. Lab 1 or Building B Room 4") }}
+                            {% if form.venue.errors %}<div class="text-danger small">{% for error in form.venue.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div id="linkGroup" style="display: none;">
+                            <label class="form-label fw-bold text-primary"><i class="fas fa-video me-2"></i>Online Meeting Link</label>
+                            {{ form.online_link(class="form-control rounded-3", placeholder="https://zoom.us/j/123...") }}
+                            {% if form.online_link.errors %}<div class="text-danger small">{% for error in form.online_link.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 7. Date, Start, End -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Date</label>
+                            {{ form.date(class="form-control rounded-3", type="date") }}
+                            {% if form.date.errors %}<div class="text-danger small">{% for error in form.date.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Start Time</label>
+                            {{ form.start_time(class="form-control rounded-3", type="time") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">End Time</label>
+                            {{ form.end_time(class="form-control rounded-3", type="time") }}
+                        </div>
+                    </div>
+
+                    <!-- 8. Capacity -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-users me-2 text-success"></i>Student Capacity</label>
+                        {{ form.capacity(class="form-control rounded-pill px-4", placeholder="Maximum number of students") }}
+                        {% if form.capacity.errors %}<div class="text-danger small">{% for error in form.capacity.errors %}{{ error }}{% endfor %}</div>{% endif %}
+                    </div>
+
+                    <div class="d-grid pt-3">
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold shadow">
+                            <i class="fas fa-save me-2"></i>Confirm & Schedule Workshop
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-white py-3 text-center border-0">
+                <a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted small">
+                    <i class="fas fa-times me-1"></i> Cancel and go back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('typeSelect');
+        const venueGroup = document.getElementById('venueGroup');
+        const linkGroup = document.getElementById('linkGroup');
+
+        function toggleInputs() {
+            if (typeSelect.value === 'Online') {
+                venueGroup.style.display = 'none';
+                linkGroup.style.display = 'block';
+            } else {
+                venueGroup.style.display = 'block';
+                linkGroup.style.display = 'none';
+            }
+        }
+
+        // Run on change
+        typeSelect.addEventListener('change', toggleInputs);
+        // Run on load to handle validation errors
+        toggleInputs();
+    });
+</script>
+
+<style>
+    .rounded-4 { border-radius: 1.25rem !important; }
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+    }
+</style>
+{% endblock %}
